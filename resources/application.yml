@@ -1,0 +1,816 @@
+spring:
+  profiles:
+    active: local
+
+  jackson: 
+    default-property-inclusion: NON_NULL
+  application:    
+    name: OCV Party API
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: DEBUG
+    org.springframework.data.elasticsearch.core: INFO
+    
+server:
+  port: 8443
+  ssl:
+    enabled: false
+    client-auth: need
+    protocol: TLS
+    enabled-protocols:
+    - TLSv1.2
+    ciphers:
+    - TLS_RSA_WITH_AES_128_CBC_SHA
+    - TLS_RSA_WITH_AES_256_CBC_SHA
+    - TLS_RSA_WITH_AES_256_CBC_SHA256
+    - TLS_RSA_WITH_AES_128_CBC_SHA256
+    key-store: KeyStore.jks
+    key-store-password: password
+    key-alias: au-ocv-api-globaltest
+    key-store-type: JKS
+    trust-store: TrustStore.jks
+    trust-store-password: password
+    trust-store-type: JKS
+  undertow:
+    io-threads: 8
+    worker-threads: 64
+
+camel:
+  springboot:
+    health.indicator.enabled: true
+
+management:
+  health:
+    elasticsearch:
+      enabled : false
+  server:
+    port: 8081
+    ssl:
+      key-store: KeyStore.jks
+      key-store-password: password
+      client-auth: want
+  endpoints:
+    web:
+      base-path: /monitor
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: OCV Maintain Party API
+    description: OCV Maintain Party API
+    version: 1.0.0
+
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        requestVolumeThreshold: 40
+        sleepWindowInMilliseconds: 2000
+        errorThresholdPercentage: 50
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+  threadpool:
+    default:
+      coreSize: 20
+      maximumSize: 200
+      allowMaximumSizeToDivergeFromCoreSize: true
+      maxQueueSize: -1
+
+rhdmMaintainParty:
+  maxRetryCount: 3
+  delay: 1000
+  maxDelay: 1000
+  multiplier: 1
+
+app:
+  statusMessages:
+    404: Party not found
+    4001: Missing mandatory headers
+    4002: Missing mandatory parameters
+    4003: Invalid request format
+    4004: Missing mandatory attributes
+    4005: Input format is not correct
+    4006: Please refine your search
+    4007: offset and limit parameter should be numeric
+    4008: Request must contain at least one search parameter along with partyType.
+    4009: Invalid source system type
+    40010: Invalid retrieve request
+    40011: Invalid identifier type
+    40013: Invalid email or mobile
+    40014: Invalid json input
+    4041: Record not found
+    4011: Unauthorized OCV Scopes
+    4012: Invalid Jwt token
+    4013: JWT Issuer is not valid
+    4014: Expired Jwt token
+    4015: Invalid Jwt Signature
+    4016: Invalid Body in JWT
+    4017: Invalid Header in JWT
+    4018: Connection Read Time out while calling JWKS Issuer
+    4019: Invalid Channel Request
+    4020: Source is Empty
+    4021: Insufficient Scope for APIc
+    4022: Invalid input to Hashicorp ADP service
+    40110: Invalid JWT Request
+    4092: The Customer already has an ANZx profile
+    5001: Request parse exception in MDM
+    5002: Backend service is not available
+    5003: Backend service Exception
+    5004: Backend service ConnectTimeoutException
+    5005: Backend service ReadTimeoutException
+    5006: Backend service Unauthorized Exception
+    5007: Invalid Structured Attributes
+    4221: Idempotency First Sent is Expired
+    4222: Idempotency First sent is not in correct format
+    5014: CAP Service unavailable
+    
+
+httpConnectionPool:
+  maxTotal: 400
+  defaultMaxPerRoute: 200
+
+backend:
+  connect-timeout: 2000
+  deleteParty-read-timeout: 120000
+  maintainParty-read-timeout: 120000
+  retrieve-api-read-timeout: 10000
+  default-jwks-cache-expiry: 10
+  default-jwks-cache-capacity: 30
+  default-jwks-cache-maxsize: 50
+
+capProfileAPI:
+  url: https://apisit03.corp.dev.anz/ocv/create-cap-customer/cap-customer/create
+  ocvclientid: 4313934d-224f-4e38-8f52-54d7ed210f66
+  
+tokenise:
+  anzxWriteScope: AU.ANZ_INTERNAL.OCV.ANZX.ACCESS.UPDATE
+  identifierUsageType: DriversLicense,Passport,DLCardNumber
+
+vault:
+  decrypt-endpoint: https://ocv-vault-integration-service-qa7-ocv.qa.apps.cpaas.qa.service.test/vault/decrypt
+
+
+idempotent:
+    channels: FENERGOANZX,CRM
+    request-modes: createCustomer
+    expiryTimeWindow: 72
+
+anzx:
+  address:
+    channels: FENERGOANZX,AX1,AEGISANZX
+
+mdmEndpoint:
+  url: http://localhost:9081/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: mdmadmin
+  password: mdmadmin
+ 
+dataStandardisation:
+  url: https://datalibrary-api-st7-ocv-dev.apps.cpaas.service.test/standardization
+dataValidation:
+  url: https://datalibrary-api-st7-ocv-dev.apps.cpaas.service.test/validation 
+  
+RedhatRuleEngineService:
+  url: https://rhdm-rule-engine-service-dev-ocv-dev.apps.cpaas.service.test:443/api/v1/rhdm/validation-standardisation/ingestion
+   
+retrieve-api:
+  url: http://localhost:8449/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR  
+---
+spring:
+  profiles: dev6
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    org.springframework.data.elasticsearch.core: INFO
+
+
+mdmEndpoint:
+  url: https://gcrdev6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password: 
+
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit6:8443
+dataValidation:
+  url: https://localhost:8443/validation
+  
+
+---
+spring:
+  profiles: st6
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: DEBUG
+
+mdmEndpoint:
+  url: https://gcrst6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://ocv-datalibrary-api-st6:8443/standardization
+dataValidation:
+  url: https://ocv-datalibrary-api-st6:8443/validation
+
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-st6-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+  
+capProfileAPI:
+  url: https://apisit03.corp.dev.anz/ocv/create-cap-customer/cap-customer/create
+  ocvclientid: 4313934d-224f-4e38-8f52-54d7ed210f66
+  
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 2000
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+---
+spring:
+  profiles: st7
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: DEBUG
+    org.springframework.data.elasticsearch.core: INFO
+
+mdmEndpoint:
+  url: https://tgrohst6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password: 
+
+dataStandardisation:
+  url: https://datalibrary-api-st7-ocv-dev.apps.cpaas.service.test/standardization
+dataValidation:
+  url: https://datalibrary-api-st7-ocv-dev.apps.cpaas.service.test/validation 
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-st7-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+vault:
+  decrypt-endpoint: https://ocv-vault-integration-service-qa7-ocv.qa.apps.cpaas.qa.service.test/vault/decrypt
+---
+spring:
+  profiles: qa2
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    com.anz.mdm.ocv.jwt: INFO
+
+mdmEndpoint:
+  url: https://cmqa2.ocv.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-qa2:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-qa2:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-qa2-ocv-qa.apps.cpaas.qa.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: qa8
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: DEBUG
+
+mdmEndpoint:
+  url: https://gcrqa3.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-qa8:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-qa8:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-qa8-ocv-qa.apps.cpaas.qa.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: qa5
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://cmqa5.ocv.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-qa5:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-qa5:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-qa5-ocv-qa.apps.cpaas.qa.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+ 
+---
+spring:
+  profiles: preprod
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://cmps.ocv.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-preprod:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-preprod:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-preprod:8443/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: prod
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    com.anz.mdm.ocv.jwt: INFO
+
+mdmEndpoint:
+  url: https://cm.ocv.service.anz/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-prod:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api:8443/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+  
+capProfileAPI:
+  url: https://api.corp.apps.anz/ocv/create-cap-customer/cap-customer/create
+  ocvclientid: a5f0f0ef-48b0-41c5-a21c-52de34855654
+  
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 2000
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+            
+---
+
+spring:
+  profiles: qa6
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    com.anz.mdm.ocv.jwt: INFO
+
+mdmEndpoint:
+  url: https://tgrohqa1.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-qa6:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-qa6:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-qa6:8443/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+
+spring:
+  profiles: sit6
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://gcrsit6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit6:8443
+dataValidation:
+  url: http://ocv-datalibrary-api-sit6:8443/validation
+RedhatRuleEngineService:
+  url: https://rhdm-rule-engine-service-dev-ocv-dev.apps.cpaas.service.test:443/api/v1/rhdm/validation-standardisation/ingestion
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-sit6-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: sit7
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    org.springframework.data.elasticsearch.core: INFO
+    com.anz.mdm.ocv.jwt: INFO
+
+mdmEndpoint:
+  url: https://tgrohsit6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit7:8443/standardization
+dataValidation:
+  url: https://ocv-datalibrary-api-sit7:8443/validation
+RedhatRuleEngineService:
+  url: https://rhdm-rule-engine-service-sit7-ocv-dev.apps.cpaas.service.test:443/api/v1/rhdm/validation-standardisation/ingestion
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-sit7-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: dev7
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    org.springframework.data.elasticsearch.core: INFO
+    com.anz.mdm.ocv.jwt: INFO
+
+mdmEndpoint:
+  url: https://tgrohsit6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit6:8443/standardization
+dataValidation:
+  url: https://ocv-datalibrary-api-sit6:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-sit7-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+
+---
+spring:
+  profiles: sit8
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://gcrsit1.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit8:8443/standardization
+dataValidation:
+  url: http://ocv-datalibrary-api-sit8:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-sit8-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: sit2
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    org.springframework.data.elasticsearch.core: INFO
+    com.anz.mdm.ocv.jwt: INFO
+
+mdmEndpoint:
+  url: https://charmsit3.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit2:8443/standardization
+dataValidation:
+  url: http://ocv-datalibrary-api-sit2:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-sit2-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: qa1
+
+logging:
+  file: logs/MDMAPI.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+
+mdmEndpoint:
+  url: https://gcrqa6.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-qa1.ocv-qa.svc:8443/standardization
+dataValidation:
+  url: https://datalibrary-api-qa2.ocv-qa.svc:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-qa1:8443/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+
+---
+spring:
+  profiles: qa7
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: DEBUG
+
+mdmEndpoint:
+  url: https://gcrqa1.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: augcrmdmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-qa7.ocv-qa.svc:8443/standardization
+dataValidation:
+  url: https://datalibrary-api-qa7.ocv-qa.svc:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-qa7-ocv-qa.apps.cpaas.qa.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+  
+capProfileAPI:
+  url: https://apisit04.corp.dev.anz/ocv/create-cap-customer/cap-customer/create
+  ocvclientid: 4313934d-224f-4e38-8f52-54d7ed210f66
+  
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 2000
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+---
+spring:
+  profiles: st1
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://gcrst3.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-st1:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-st1.ocv-qa.svc:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-st1-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+  
+---
+spring:
+  profiles: dev8
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+    org.springframework.data.elasticsearch.core: INFO
+
+mdmEndpoint:
+  url: https://gcrdev1.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+dataStandardisation:
+  url: https://ocv-datalibrary-api-sit7:8443/standardization
+dataValidation:
+  url: https://ocv-datalibrary-api-sit7:8443/validation
+
+---
+spring:
+  profiles: bmct-sit
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://bmsit1.ocv.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-bmct-sit:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-bmct-sit:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-bmct-sit-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+  
+capProfileAPI:
+  url: https://apisit03.corp.dev.anz/ocv/create-cap-customer/cap-customer/create
+  ocvclientid: 4313934d-224f-4e38-8f52-54d7ed210f66
+  
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 2000
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+
+---
+spring:
+  profiles: dev9
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://tgrohdev1.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-dev9:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-dev9:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-dev9-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR
+  
+capProfileAPI:
+  url: https://apisit03.corp.dev.anz/ocv/create-cap-customer/cap-customer/create
+  ocvclientid: 4313934d-224f-4e38-8f52-54d7ed210f66
+  
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 2000
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 4000
+            
+---
+spring:
+  profiles: st2
+
+logging:
+  file: logs/ocv-party-api.log
+  pattern:
+    file: "%d [%-15.15t] %-5p %-30.30c{1} - %X{mdcData} - %m%n"
+  level:
+    root: INFO
+    com.anz.mdm.ocv.api: INFO
+
+mdmEndpoint:
+  url: https://charmst3.service.dev/com.ibm.mdm.server.ws.restful/resources/MDMWSRESTful
+  username: aucmadmindsa
+  password:
+
+dataStandardisation:
+  url: https://datalibrary-api-st2:8443/standardization
+dataValidation:
+  url: http://datalibrary-api-st2:8443/validation
+
+retrieve-api:
+  url: https://ocv-retrieve-party-api-st2-ocv-dev.apps.cpaas.service.test/parties/retrieve
+  good-status: OK,NOT_FOUND,BAD_REQUEST,INTERNAL_SERVER_ERROR

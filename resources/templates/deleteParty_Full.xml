@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TCRMService xmlns="http://www.ibm.com/mdm/schema"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.ibm.com/mdm/schema MDMDomains.xsd">
+	<RequestControl>
+		<requestID>@requestID@</requestID>
+		<DWLControl>
+			<requesterName>@requesterName@</requesterName>
+			<requesterLocale>en</requesterLocale>
+			<requestTime>@requestTime@</requestTime>
+			<transactionCorrelatorId>@transactionCorrelatorId@</transactionCorrelatorId>
+			<clientSystemName>@clientSystemName@</clientSystemName>
+			<returnResponse>Y</returnResponse>
+		</DWLControl>
+	</RequestControl>
+	<TCRMTx>
+		<TCRMTxType>purgeParty</TCRMTxType>
+		<TCRMTxObject>TCRMPartyBObj</TCRMTxObject>
+		<TCRMObject>
+			<TCRMPartyBObj>
+				<TCRMAdminContEquivBObj>
+					<AdminPartyId>@AdminPartyId@</AdminPartyId>
+					<AdminSystemValue>@AdminSystemValue@</AdminSystemValue>
+				</TCRMAdminContEquivBObj>
+			</TCRMPartyBObj>
+		</TCRMObject>
+	</TCRMTx>
+</TCRMService>
